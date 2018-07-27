@@ -7,12 +7,13 @@
  */
 
 import weka.core.Instances;
+import weka.gui.visualize.plugins.GraphVisualizePlugin;
 import weka.core.converters.CSVLoader;
 import weka.clusterers.SimpleKMeans;
 import java.util.*;
-//import weka.filters.unsupervised.attribute.InterquartileRange;
-//import weka.filters.unsupervised.instance.RemoveWithValues;
-//import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.InterquartileRange;
+import weka.filters.unsupervised.instance.RemoveWithValues;
+import weka.filters.Filter;
 
 import java.io.*;
 import weka.core.converters.ArffSaver;
@@ -39,7 +40,6 @@ public class main_tester
         Reader read = new FileReader("arff_kmers.arff");
         
         data = new Instances(read);
-        
         /**
         InterquartileRange outliers = new InterquartileRange();
         
@@ -50,13 +50,11 @@ public class main_tester
         RemoveWithValues remove = new RemoveWithValues();
         
         remove.setInputFormat(data);
-        remove.setAttributeIndex(String.format("%d", k+1));
+        remove.setAttributeIndex("last");
         remove.setNominalIndices("last");
         
         data = Filter.useFilter(data, remove);
-        data.deleteAttributeAt(k + 1);
         */
-        
         SimpleKMeans cluster = new SimpleKMeans();
         cluster.setSeed(101);
         cluster.setPreserveInstancesOrder(true);
@@ -77,19 +75,15 @@ public class main_tester
     public static void relations(String cluster_txt, int fragments, int k, int coverage, int numClusters,boolean real) throws IOException
     {
     	System.out.println("Print the threshold you want.");
-	   	int [] thresholds = {8,10,12,14};
+	   	int [] thresholds = {5,6,7,8};
 	   	
 	   	Date date = new Date();
 	   	String time = date.toString();
 	   	String formatedTime = time.replaceAll(" ", "_").replaceAll(":", "-");
 	   	System.out.println("Print additional details of your file. (No Spaces, Underscore different elements)");
 	   	
-	   	for (int threshold : thresholds)
-	   	{
-	   		String fileName = String.format("%dfragments_%dcoverage_%dmers_%dcluster_%dthreshold_outliers%s_%s", fragments,coverage,k,numClusters,threshold,"kept",formatedTime);
-	   		new Cluster_Creator(cluster_txt,fileName,threshold,real);
-	   		counting(fileName);
-	   	}
+	   		String fileName = String.format("%dfragments_%dcoverage_%dmers_%dcluster_outliers%s_%s", fragments,coverage,k,numClusters,"kept",formatedTime);
+	   		new Cluster_Creator(cluster_txt,fileName,thresholds,real);
     }
     public static String printcsv(List<String> rmap, int[] clusters) throws IOException
     {
@@ -109,7 +103,7 @@ public class main_tester
     public static FileParameters generator() throws IOException
     {
     	Scanner scan = new Scanner(System.in);
-    	String file = "darshan";
+    	String file = "Rmap.txt";
     	System.out.println("Errors? Y/N");
     	String errors = scan.next();
     	int k,fragments = 0,coverage = 0;
@@ -142,25 +136,6 @@ public class main_tester
         return encapsulate;
         
         
-    }
-    public static void counting(String fileName) throws IOException
-    {
-    	int count = 0;
-    	Scanner scan = new Scanner(new File("Relations/"+ fileName));
-    	
-    	while (scan.hasNextLine())
-    	{
-    		scan.nextLine();
-    		count --;
-    	}
-    	scan = new Scanner(new File("Relations/"+ fileName));
-    	while (scan.hasNext())
-    	{
-    		scan.next();
-    		count ++;
-    	}
-    	scan.close();
-    	System.out.println(count);
     }
 }
 
